@@ -1,135 +1,120 @@
-import twitter
+import requests
 import os
+import json
 from dotenv import load_dotenv
 import psycopg2
+import time
 from pathlib import Path 
-import datetime 
-import requests
-import json
-import tweepy
+import twitter
 
-# retrieve sensetive env data
 env_path = Path('.') / '.env'
 load_dotenv(dotenv_path=env_path)
+bearer_token = str(os.getenv('BEARER_TOKEN'))
+
+start_date = "201909150000" # from 15th september 2019
+end_date = "202012150000" # until 15th december 2020
+
+url = "https://api.twitter.com/1.1/tweets/search/fullarchive/staging.json "
+    
+# tweet.user.followers_count, tweet.retweet_count , tweet.user.verified, 
 
 #### connect to database to store our data - https://www.psycopg.org/docs/install.html#quick-install ####
-# Connect to your postgres DB
-conn = psycopg2.connect("host=localhost dbname=twitterData user=kimiapirouzkia")
+def connect_to_postgres():
+    # Connect to your postgres DB
+    try:
+        conn = psycopg2.connect("host=localhost dbname=twitterData user=kimiapirouzkia")
+    except:
+        print("Unable to connect to the associates database.")
 
-# Open a cursor to perform database operations
-cur = conn.cursor()
-
-
-#times of the protest
-start_date = "Fri Nov 15 00:00:00 +0000 2019"
-end_date = "Tue Dec 16 00:00:00 +0000 2020"
-
-def extract_hashtags_from_tweets(tweet):
-    extra_hashtags = []
-    words = tweet.split()
-    for word in words:
-        letters = list(word)
-        if letters[0] == '#':
-            extra_hashtags.append(word)
-    return extra_hashtags
+    # Open a cursor to perform database operations
+    cur = conn.cursor()
+    return conn, cur
 
 #### https://www.geeksforgeeks.org/read-a-file-line-by-line-in-python/ ####
 def extract_initial_hashtags_from_text_file():
     hashtags = []
     f = open("hashtags.txt", "r")
     for line in f:
-        hashtags.append(line.strip())
- 
+        hashtags.append(str(line.strip()))
     f.close()
+    
     return hashtags
 
 def get_country(place):
     if not place:
         return "N/A"
-    return str(place["country"])
+    
+    return place["country"]
 
-def get_hashtags(entities):
-    if not entities:
-        return "N/A"
-    return str(entities["hashtags"])
+def create_headers(token):
+    headers = {"Authorization":"Bearer {}".format(token),
+               "content-type":"application/json",
+               }
+    
+    return headers
+
+def connect_to_endpoint(url, headers, payload):
+    response = requests.post(url, headers=headers, json=payload)
+    print(response.status_code)
+    
+    if response.status_code != 200:
+        raise Exception(response.status_code, response.text)
+    
+    return response.json()
+
+def collect_all(url, hashtags):
+    token = bearer_token
+    
+    next_token = ''
+    
+    for hashtag in hashtags:
+        while True:
+            conn, cur = connect_to_postgres()
+            
+            payload = {
+                    "query":hashtag,
+                    "maxResults":"500",
+                    "fromDate":start_date,
+                    "toDate":end_date,
+                    }
+            
+            if next_token:
+                payload['next'] = next_token
+                
+            tweets = connect_to_endpoint(url, create_headers(token), payload)
+            
+            results = tweets['results']
+            
+            if results:
+                print("there ARE tweets for {}".format(hashtag))
+                
+                for tweet in results:
+                    try:
+                        cur.execute("INSERT INTO tweets VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (json.dumps(get_country(tweet['place'])), json.dumps(tweet['text']), json.dumps(tweet['entities']['hashtags']), json.dumps(tweet['id']),  json.dumps(tweet['user']['id']), json.dumps(tweet['lang']), json.dumps(tweet['user']['followers_count']), json.dumps(tweet['retweet_count']) , json.dumps(tweet['user']['verified']), json.dumps(tweet['created_at']), json.dumps(tweet['favorite_count'])))
+                        
+                        conn.commit()
+                    except Exception as e:
+                        print("tweet id: {} - error: {}".format(tweet['id'], e))
+                        pass
+                    
+                if tweets['next']:
+                    next_token = tweets['next']  
+                else: 
+                    break
+                
+            else:
+                print("there are NO tweets for {}".format(hashtag))
+                break
+                
+            print("sleeping for 10 secs")
+            time.sleep(10)
+            
 
 def main():
-    consumer_key=os.getenv('CONSUMER_KEY')
-    consumer_secret=os.getenv('CONSUMER_SECRET')
-    access_token_key=os.getenv('ACCESS_TOKEN_KEY')
-    access_token_secret=os.getenv('ACCESS_TOKEN_SECRET')
-
-    # api = twitter.Api(consumer_key, consumer_secret, access_token_key, access_token_secret)
-
-    authentication = tweepy.OAuthHandler(consumer_key, consumer_secret)
-    authentication.set_access_token(access_token_key, access_token_secret)
-    api = tweepy.API(authentication, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
-
     hashtags = extract_initial_hashtags_from_text_file()
-    data = {}
-    extra_hashtags = {}
-
-    endpoint = "https://api.twitter.com/2/tweets/search/recent?query=snow&max_results=100"
-    headers = {"Authorization": "Bearer AAAAAAAAAAAAAAAAAAAAAA9IKQEAAAAAR7hy7%2BBUghmBGZKEeNiy8CvhqYo%3D2XmeSWFSejMJWp4jSkT5IUE0gcwyJuCwybJ4YKW7ERlkJ37jmR"}
-    tweets = requests.get(endpoint, headers=headers).json()
-
-    tweetsPerQry = 100
-    maxTweets = 100000000
-
-    startDate = datetime.datetime(2019, 9, 15, 0, 0, 0) 
-    endDate =   datetime.datetime(2020, 11, 16, 0, 0, 0)
-
-    #### https://chatbotslife.com/crawl-twitter-data-using-30-lines-of-python-code-e3fece99450e #####
-
-    # time = '2020-12-16'
-    # tweets = api.GetSearch(raw_query="https://api.twitter.com/2/tweets/search/recent?query=snow&max_results=100")
-    # data = tweets["data"]
-    # token = tweets["meta"]["next_token"]
-    # print(data)
-    for hashtag in hashtags:
-        maxId = -1
-        tweetCount = 0
-        while tweetCount < maxTweets:
-            if(maxId <= 0):
-                newTweets = api.search(q=hashtag, count=tweetsPerQry, result_type="recent", tweet_mode="extended")
-            else:
-                newTweets = api.search(q=hashtag, count=tweetsPerQry, max_id=str(maxId - 1), result_type="recent", tweet_mode="extended")
-            
-            if not newTweets:
-                print("no tweets for {}".format(hashtag))
-                break
-            
-            for tweet in newTweets:
-                print("tweets for {}".format(hashtag))
-                print(tweet.created_at)
-                if tweet.created_at < endDate and tweet.created_at > startDate:
-                    cur.execute("INSERT INTO tweets VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", ("et_country(tweet.place)", tweet.full_text, get_hashtags(tweet.entities) , tweet.id,  tweet.user.id, tweet.lang, tweet.user.followers_count, tweet.retweet_count , tweet.user.verified, tweet.created_at))
-                    conn.commit()
-                # print(tweet.place)
-                
-            tweetCount += len(newTweets)	
-            maxId = newTweets[-1].id
-
-        
-    # for hashtag in hashtags:
-    # tweets = api.GetSearch(term="#IranInternetShutdown", count=7000, since="2019-11-15")
-    # for tweet in tweets:
-    #     data[tweet.created_at] = (tweet.text, tweet.geo)
-    #     temp = extract_hashtags_from_tweets(tweet.text)
-    #     for t in temp:
-    #         if t not in extra_hashtags:
-    #             extra_hashtags[t] = 1
-    #         else:
-    #             extra_hashtags[t] += 1
-    #     # if tweet.create_at != start_date:
-    #     cur.execute("INSERT INTO tweets VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (get_country(tweet.place), tweet.text, '#'.join(temp), tweet.id,  tweet.user.id, tweet.lang, tweet.user.followers_count, tweet.retweet_count , tweet.user.verified, tweet.created_at))
-    #     conn.commit()
-    #     # new_datetime = datetime.strftime(datetime.strptime(tweet.created_at ,'%a %b %d %H:%M:%S +0000 %Y'), '%Y-%m-%d')
-    #     # time = 
-    # print(len(tweets))
-
-
     
-    
+    collect_all(url, hashtags)
+
+
 if __name__ == "__main__":
     main()
