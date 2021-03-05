@@ -14,7 +14,7 @@ bearer_token = str(os.getenv('BEARER_TOKEN'))
 start_date = "201909150000" # from 15th september 2019
 end_date = "202012150000" # until 15th december 2020
 
-url = "https://api.twitter.com/1.1/tweets/search/fullarchive/staging.json "
+url = "https://api.twitter.com/1.1/tweets/search/fullarchive/staging.json"
     
 # tweet.user.followers_count, tweet.retweet_count , tweet.user.verified, 
 
@@ -97,9 +97,10 @@ def collect_all(url, hashtags):
                         print("tweet id: {} - error: {}".format(tweet['id'], e))
                         pass
                     
-                if tweets['next']:
+                if 'next' in tweets:
                     next_token = tweets['next']  
                 else: 
+                    print("no next token so we move to the next hashtag")
                     break
                 
             else:
