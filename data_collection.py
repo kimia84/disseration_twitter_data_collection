@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 import psycopg2
 import time
 from pathlib import Path 
-import twitter
 
 env_path = Path('.') / '.env'
 load_dotenv(dotenv_path=env_path)
