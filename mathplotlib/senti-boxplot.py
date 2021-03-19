@@ -2,12 +2,15 @@ from matplotlib import pyplot as plt
 import numpy as np
 import csv
 from collections import Counter 
+import ast
+import pandas as pd
 from textblob import TextBlob
 import re
 from textblob.sentiments import NaiveBayesAnalyzer
 
 def clean_tweet(tweet):
     return ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)", " ", tweet).split()) #removing hyperlinks and special charaters
+
 
 def analyse_tweet(tweet):
     analysis = TextBlob(tweet)
@@ -21,28 +24,18 @@ def analyse_tweet(tweet):
 with open('twitterData_public_tweets.csv') as file:
     csv_reader =  csv.DictReader(file)
     
-    sentiment_counter = Counter()
+    sentiments = []
+    num = []
 
     for row in csv_reader:
-        sentiment_counter.update({analyse_tweet(row['content'])})
+        sentiments.append(analyse_tweet(row['content'])) 
+        num.append(TextBlob(row['content']).sentiment.polarity)
         
-sentiments = []
-tally = []
 
-for sentiment in sentiment_counter.most_common(5):
-    sentiments.append(sentiment[0])
-    tally.append(sentiment[1])
+data = {'Sentiment':sentiments,'Value':num}
+data_pd = pd.DataFrame(data)
 
-w = 3
-nitems = len(tally)
-x_axis = np.arange(0, nitems*w, w)    # set up a array of x-coordinates
-
-fig, ax = plt.subplots(1)
-ax.barh(x_axis, tally)
-ax.set_title('What is the sentiment of each tweet?')
-ax.set_xlabel('Sentiment')
-ax.set_ylabel('number of tweets')
-ax.set_yticks(x_axis);
-ax.set_yticklabels(sentiments);
+data_pd.boxplot(by='Sentiment', column='Value')
+plt.xlabel('Sentiment of tweets')
+plt.ylabel('Polarity value')
 plt.show()
-
