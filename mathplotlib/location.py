@@ -20,8 +20,10 @@ for location in location_counter.most_common(20):
     locations.append(location[0])
     tally.append(location[1])
 
-locations.pop(0)
-tally.pop(0)
+print(locations)
+print(tally)
+# locations.pop(0)
+# tally.pop(0)
 
 w = 3
 nitems = len(tally)

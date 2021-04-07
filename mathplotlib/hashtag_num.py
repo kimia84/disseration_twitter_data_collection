@@ -29,10 +29,11 @@ for hashtag in hashtag_counter.most_common(20):
     tally.append(hashtag[1])
 
 
-plt.bar(hashtags, tally)
+plt.bar(hashtags, tally, color="grey")
 plt.xlabel('Hashtags')
 plt.ylabel('times')
 plt.title('How many times has each hashtag been mentioned?')
 plt.xticks(rotation=90)
+plt.tight_layout()
 plt.show()
 

@@ -17,7 +17,7 @@ def analyse_tweet(tweet):
     if analysis.sentiment.polarity > 0: # positive
         return "positive"
     elif analysis.sentiment.polarity == 0: # neutral / we don't know
-        return "neutral"
+        pass
     else: # negative
         return "negative"
     
