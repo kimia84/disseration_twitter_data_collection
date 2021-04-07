@@ -55,22 +55,3 @@ with open('twitterData_public_tweets.csv') as file:
     the_table[(4, 2)].set_facecolor("green")
 
     plt.show()
-            
-#     x = []
-#     tweet_count = []
-#     rt_count = []  
-    
-#     i = 1  
-     
-#     for tweet in user_id_counter.most_common(100):
-#         tweet_count.append(followers[tweet[0]][0])
-#         rt_count.append(followers[tweet[0]][1])
-#         x.append("user {}".format(i))
-        
-#         i+=1
-
-
-# df = pd.DataFrame(np.c_[tweet_count,rt_count], index=x, columns=["Original tweets","Retweets"])
-# df.plot.bar()
-
-# plt.show()

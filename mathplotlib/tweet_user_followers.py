@@ -58,30 +58,14 @@ ax.axis('off')
 the_table = ax.table(cellText=data,colLabels=column_labels,colColours =["yellow"] * 2,loc="center")
 the_table[(1, 0)].set_facecolor("#1ac3f5")
 the_table[(1, 1)].set_facecolor("#1ac3f5")
-
 plt.show()
 
-# y_pos = np.arange(len(user))
+plt.bar(user, tally)
+plt.xlabel('Top users')
+plt.ylabel('number of tweets')
+plt.title('Who sent the most tweets out?')
+plt.show()
 
-
-# # Basic plot
-# plt.bar(y_pos, follower_num, color='orange')
-
-# plt.title('The follower count of the top ten most tweeted users')
-# plt.xticks(y_pos, user, color='black', rotation=45, horizontalalignment='right')
-# plt.show()
- 
-# # remove labels
-# plt.tick_params(labelbottom=False)
-# plt.show()
-
-# plt.bar(user, tally)
-# plt.xlabel('Top users')
-# plt.ylabel('number of tweets')
-# plt.title('Who sent the most tweets out?')
-# # plt.xticks()
-# plt.show()
-
-# plt.pie(verified_tally, labels = verified_name, shadow=True)
-# plt.title('How many users are verified?')
-# plt.show() 
+plt.pie(verified_tally, labels = verified_name, shadow=True)
+plt.title('How many users are verified?')
+plt.show() 

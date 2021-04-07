@@ -36,13 +36,11 @@ with open('twitterData_public_tweets.csv') as file:
         x.append("user {}".format(i))
         
         i+=1
-    
-    print(sum(tweet_count))
-    print(sum(rt_count))
+ 
 
 
-# df = pd.DataFrame(np.c_[tweet_count,rt_count], index=x, columns=["Original tweets","Retweets"])
-# df.plot.bar()
+df = pd.DataFrame(np.c_[tweet_count,rt_count], index=x, columns=["Original tweets","Retweets"])
+df.plot.bar()
 
-# plt.show()
+plt.show()
 

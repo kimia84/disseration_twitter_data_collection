@@ -30,7 +30,6 @@ countries = []
 hashtags = []
 tally = []
 
-# print(hashtag_counter)
 for hashtag in hashtag_counter.most_common(5):
     countries.append(hashtag[0])
     tally.append(hashtag[1])

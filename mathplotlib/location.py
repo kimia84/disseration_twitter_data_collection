@@ -22,8 +22,6 @@ for location in location_counter.most_common(20):
 
 print(locations)
 print(tally)
-# locations.pop(0)
-# tally.pop(0)
 
 w = 3
 nitems = len(tally)

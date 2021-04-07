@@ -23,22 +23,5 @@ with open('twitterData_public_tweets.csv') as file:
     for row in csv_reader:
         hashtag_counter.update(get_hashtag_lang(row['hashtags']))
         
-# hashtags = []
-# tally = []
 
 print(hashtag_counter.most_common(20))
-
-# for hashtag in hashtag_counter.most_common(20):
-#     print(hashtag)
-#     hashtags.append(hashtag[0])
-#     tally.append(hashtag[1])
-# print(hashtags)
-
-
-# plt.bar(hashtags, tally)
-# plt.xlabel('Hashtags')
-# plt.ylabel('times')
-# plt.title('How many times has each hashtag been mentioned?')
-# plt.xticks(rotation=90)
-# plt.show()
-
