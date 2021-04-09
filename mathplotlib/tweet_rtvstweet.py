@@ -22,7 +22,7 @@ with open('twitterData_public_tweets.csv') as file:
             if str({row['content']}).startswith("{\'\"RT "):
                 followers[row['user_id']] = [0, 1]
             else:
-                followers[row['user_id']] = [1, 0]# [tweet_count, retweet_count]
+                followers[row['user_id']] = [1, 0] # [tweet_count, retweet_count]
             
     x = []
     tweet_count = []

@@ -6,7 +6,8 @@ import ast
 from langdetect import detect
 
 
-##### https://github.com/vprusso/youtube_tutorials/tree/master/twitter_python #####
+##### this article was used when coding this file: https://github.com/vprusso/youtube_tutorials/tree/master/twitter_python #####
+
 def get_hashtag_lang(list_of_hastags):
     temp = ast.literal_eval(list_of_hastags) 
     hashtags = []

@@ -14,10 +14,8 @@ start_date = "201909150000" # from 15th september 2019
 end_date = "202012150000" # until 15th december 2020
 
 url = "https://api.twitter.com/1.1/tweets/search/fullarchive/staging.json"
-    
-# tweet.user.followers_count, tweet.retweet_count , tweet.user.verified, 
 
-#### connect to database to store our data - https://www.psycopg.org/docs/install.html#quick-install ####
+##### this article was used when coding this file: connect to database to store our data - https://www.psycopg.org/docs/install.html#quick-install ##### 
 def connect_to_postgres():
     # Connect to your postgres DB
     try:
@@ -29,7 +27,7 @@ def connect_to_postgres():
     cur = conn.cursor()
     return conn, cur
 
-#### https://www.geeksforgeeks.org/read-a-file-line-by-line-in-python/ ####
+##### this article was used when coding this file: https://www.geeksforgeeks.org/read-a-file-line-by-line-in-python/ ##### 
 def extract_initial_hashtags_from_text_file():
     hashtags = []
     f = open("hashtags.txt", "r")
